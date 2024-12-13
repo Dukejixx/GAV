@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrador</title>
+  <link rel="stylesheet" th:href="@{/css/style_VAdmin.css}">
+</head>
+<body>
+<div class="container">
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+  <aside class="sidebar">
+    <div class="header">
+      <img src="/avatar_50x50.png" class="avatar">
+      <h2>Administrador</h2>
+    </div>
+    <nav>
+      <button class="menu-btn" onclick="showPanel('registroConductor')">Registrar Conductor</button>
+      <button class="menu-btn" onclick="showPanel('conductores')">Conductores</button>
+      <button class="menu-btn" onclick="showPanel('registroVehiculo')">Registrar Vehículo</button>
+      <button class="menu-btn" onclick="showPanel('vehiculos')">Vehículos</button>
+      <button class="menu-btn" onclick="showPanel('solicitudes')">Solicitudes de viajes</button>
+      <button class="menu-btn" onclick="showPanel('historialViajes')">Historial viajes</button>
+    </nav>
+    <div class="logout">
+      <button class="menu-btn" onclick="showPanel('cerrarSesion')">Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <!-- Panel de Registrar Conductor -->
+    <div id="registroConductor" class="panel" th:classappend="${activePanel == 'registroConductor' ? 'active' : 'hidden'}">
+    <h3>Registrar Conductor</h3>
+    <form id="formRegistroConductor" method="POST" th:action="@{/registroConductor}">
+      <label for="nombreCompleto">Nombre Completo:</label>
+      <input type="text" id="nombreCompleto" name="nombreCompleto" th:value="${conductor?.nombreCompleto}" required>
+
+      <label for="apellidos">Apellidos:</label>
+      <input type="text" id="apellidos" name="apellidos" th:value="${conductor?.apellidos}" required>
+
+      <label for="telefono">Teléfono:</label>
+      <input type="text" id="telefono" name="telefono" th:value="${conductor?.telefono}" required>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" th:value="${conductor?.email}" required>
+
+      <label for="cedula">Cédula:</label>
+      <input type="text" id="cedula" name="cedula" th:value="${conductor?.cedula}" required>
+
+      <label for="fechaNacimiento">Fecha de Nacimiento:</label>
+      <input type="date" id="fechaNacimiento" name="fechaNacimiento" th:value="${conductor?.fechaNacimiento}" required>
+
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" th:value="${conductor?.username}" required>
+
+      <label for="password">Password:</label>
+      <input type="text" id="password" name="password" th:value="${conductor?.password}" required>
+
+      <label for="vehiculo">Vehículo:</label>
+      <select id="vehiculo" name="vehiculo">
+        <option value="" disabled selected>Seleccione un vehículo</option>
+        <th:block th:each="vehiculo : ${vehiculos}">
+          <option th:value="${vehiculo.id}" th:text="${vehiculo.placa}"
+                  th:selected="${conductor?.vehiculo?.id == vehiculo.id}"></option>
+        </th:block>
+      </select>
+
+      <button type="submit">Registrar Conductor</button>
+
+      <div th:if="${successRegistroConductor}" class="alert alert-success">
+        <p th:text="${successRegistroConductor}"></p>
+      </div>
+      <div th:if="${errorRegistroConductor}" class="alert alert-danger">
+        <p th:text="${errorRegistroConductor}" style="color: red;"></p>
+      </div>
+    </form>
+  </div>
+
+
+    <!-- Panel de Conductores -->
+    <div id="conductores" class="panel" th:classappend="${activePanel == 'conductores' ? 'active' : 'hidden'}">
+      <h3>Conductores Registrados</h3>
+      <table border="1">
+        <thead>
+        <tr>
+          <th>Nombre Completo</th>
+          <th>Apellidos</th>
+          <th>Cédula</th>
+          <th>Teléfono</th>
+          <th>Email</th>
+          <th>Vehículo</th>
+          <th>Disponible</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="conductor : ${conductores}">
+          <td th:text="${conductor.nombreCompleto}">Nombre Completo</td>
+          <td th:text="${conductor.apellidos}">Apellidos</td>
+          <td th:text="${conductor.cedula}">Cédula</td>
+          <td th:text="${conductor.telefono}">Teléfono</td>
+          <td th:text="${conductor.email}">Email</td>
+          <td th:text="${conductor.vehiculo != null ? conductor.vehiculo.placa : 'Sin asignar'}">Vehículo</td>
+          <td th:text="${conductor.disponible != null ? (conductor.disponible ? 'Sí' : 'No') : 'Desconocido'}"></td>
+          <td>
+            <!-- Botón Modificar -->
+            <form th:action="@{/ModificarConductor/{id}(id=${conductor.id})}" method="get" style="display:inline;">
+              <button type="submit">Modificar</button>
+            </form>
+            <!-- Botón Eliminar -->
+            <form th:action="@{/eliminarConductor/{id}(id=${conductor.id})}" method="post" style="display:inline;">
+              <button type="submit" onclick="return confirm('¿Estás seguro de eliminar este conductor?')">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <div th:if="${successConductores}" class="alert alert-success">
+        <p th:text="${successConductores}"></p>
+      </div>
+
+      <div th:if="${errorConductores}" class="alert alert-danger">
+        <p th:text="${errorConductores}" style="color: red;"></p>
+      </div>
+
+    </div>
+
+    <!-- Panel de Registrar Vehículo -->
+    <div id="registroVehiculo" class="panel" th:classappend="${activePanel == 'registroVehiculo' ? 'active' : 'hidden'}">
+      <h3>Registrar Vehículo</h3>
+      <form th:action="@{/registroVehiculo}" method="POST">
+        <div>
+          <label for="marca">Marca:</label>
+          <input type="text" id="marca" name="marca" th:value="${vehiculo != null ? vehiculo.marca : ''}" required>
+        </div>
+        <div>
+          <label for="modelo">Modelo:</label>
+          <input type="text" id="modelo" name="modelo" th:value="${vehiculo != null ? vehiculo.modelo : ''}" required>
+        </div>
+        <div>
+          <label for="capacidadMaxima">Capacidad Máxima:</label>
+          <input type="number" id="capacidadMaxima" name="capacidadMaxima" th:value="${vehiculo != null ? vehiculo.capacidadMaxima : ''}" required>
+        </div>
+        <div>
+          <label for="placa">Placa:</label>
+          <input type="text" id="placa" name="placa" th:value="${vehiculo != null ? vehiculo.placa : ''}" required>
+        </div>
+        <div>
+          <button type="submit" class="btn btn-primary">Registrar Vehículo</button>
+        </div>
+        <div th:if="${successRegistroVehiculo}" class="alert alert-success">
+          <p th:text="${successRegistroVehiculo}"></p>
+        </div>
+        <!-- Mostrar mensaje de error si se presenta -->
+        <div th:if="${errorRegistroVehiculo}" class="alert alert-danger">
+          <p th:text="${errorRegistroVehiculo}" style="color: red;"></p>
+        </div>
+      </form>
+    </div>
+
+    <!-- Panel de Vehículos -->
+    <div id="vehiculos" class="panel" th:classappend="${activePanel == 'vehiculos' ? 'active' : 'hidden'}">
+      <h3>Vehículos Registrados</h3>
+      <table border="1">
+        <thead>
+        <tr>
+          <th>Marca</th>
+          <th>Modelo</th>
+          <th>Capacidad Máxima</th>
+          <th>Placa</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="vehiculo : ${vehiculos}">
+          <td th:text="${vehiculo.marca}">Marca</td>
+          <td th:text="${vehiculo.modelo}">Modelo</td>
+          <td th:text="${vehiculo.capacidadMaxima}">Capacidad Máxima</td>
+          <td th:text="${vehiculo.placa}">Placa</td>
+          <td>
+            <!-- Botón Modificar -->
+            <form th:action="@{/ModificarVehiculo/{id}(id=${vehiculo.id})}" method="get" style="display:inline;">
+              <button type="submit">Modificar</button>
+            </form>
+            <!-- Botón Eliminar -->
+            <form th:action="@{/eliminarVehiculo/{id}(id=${vehiculo.id})}" method="post" style="display:inline;">
+              <button type="submit" onclick="return confirm('¿Estás seguro de eliminar este vehículo?')">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <div th:if="${successVehiculos}" class="alert alert-success">
+        <p th:text="${successVehiculos}"></p>
+      </div>
+
+      <div th:if="${errorVehiculos}" class="alert alert-danger">
+        <p th:text="${errorVehiculos}" style="color: red;"></p>
+      </div>
+    </div>
+
+    <!-- Panel de Solicitudes de Viajes -->
+    <div id="solicitudes" class="panel" th:classappend="${activePanel == 'solicitudes' ? 'active' : 'hidden'}">
+      <h3>Solicitudes de Viajes</h3>
+      <table border="1">
+        <thead>
+        <tr>
+          <th>Destino</th>
+          <th>Cantidad de Pasajeros</th>
+          <th>Fecha de Solicitud</th>
+          <th>Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="viaje : ${viajesPendientes}">
+          <td th:text="${viaje.destino}"></td>
+          <td th:text="${viaje.cantidadPasajeros}"></td>
+          <td th:text="${viaje  .fechaSolicitud}"></td> <!-- Asumimos que tienes un campo 'fechaSolicitud' -->
+          <td>
+            <!-- Botón para asignar conductor -->
+            <form th:action="@{/asignarConductor/{id}(id=${viaje.id})}" method="get" style="display:inline;">
+              <button type="submit"> Asignar</button>
+            </form>
+
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <div th:if="${successAsignado}" class="alert alert-success">
+        <p th:text="${successAsignado}"></p>
+      </div>
+      <div th:if="${errorAsignado}" class="alert alert-danger">
+        <p th:text="${errorAsignado}" style="color: red;"></p>
+      </div>
+    </div>
+
+
+    <!-- Panel de Historial de Viajes -->
+    <div id="historialViajes" class="panel" th:classappend="${activePanel == 'historialViajes' ? 'active' : 'hidden'}">
+      <h3>Historial de Viajes Completados</h3>
+      <table>
+        <thead>
+        <tr>
+          <th>Destino</th>
+          <th>Cantidad de Pasajeros</th>
+          <th>Fecha</th>
+          <th>Precio</th>
+          <th>Cliente</th>
+          <th>Conductor</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Iterar sobre los viajes completados -->
+        <tr th:each="viaje : ${historialViajes}">
+          <td th:text="${viaje.destino}">Destino</td>
+          <td th:text="${viaje.cantidadPasajeros}">Cantidad de Pasajeros</td>
+          <td th:text="${viaje.fechaSolicitud}">Fecha</td>
+          <td th:text="${viaje.precio}">Precio</td>
+          <td th:text="${viaje.cliente.nombreCompleto}">Cliente</td>
+          <td th:text="${viaje.conductor.nombreCompleto}">Conductor</td>
+        </tr>
+        </tbody>
+      </table>
+      <div class="ganancias">
+        <h4>Ganancias Totales:</h4>
+        <p th:text="${totalGanado}">0.0</p>
+      </div>
+    </div>
+
+
+    <!-- Panel de Cerrar Sesión -->
+    <div id="cerrarSesion" class="panel hidden">
+      <h3>Cerrar Sesión</h3>
+      <p>Confirma si deseas cerrar la sesión.</p>
+      <form action="/logout" method="post">
+        <button type="submit" class="btn btn-danger">Sí, cerrar sesión</button>
+      </form>
+    </div>
+  </main>
+</div>
+
+<script>
+  function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('active');
+  }
+
+  function showPanel(panelId) {
+    const panels = document.querySelectorAll('.panel');
+    panels.forEach(panel => {
+      if (panel.id === panelId) {
+        panel.classList.add('active');
+        panel.classList.remove('hidden');
+      } else {
+        panel.classList.remove('active');
+        panel.classList.add('hidden');
+      }
+    });
+  }
+</script>
+</body>
+</html>

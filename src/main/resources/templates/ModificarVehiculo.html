@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificar Vehículo</title>
+    <link rel="stylesheet" th:href="@{/css/style_VModificar.css}">
+</head>
+<body>
+<div class="container">
+    <h2>Modificar Vehículo</h2>
+
+    <!-- Mostrar mensaje de error si hay placa duplicada -->
+    <div th:if="${errorRegistroVehiculo}" class="alert alert-danger">
+        <p th:text="${errorRegistroVehiculo}" style="color: red;"></p>
+    </div>
+
+    <form th:action="@{/guardarModificacionVehiculo}" method="post">
+        <input type="hidden" id="id" name="id" th:value="${vehiculo.id}">
+
+        <div>
+            <label for="marca">Marca:</label>
+            <input type="text" id="marca" name="marca" th:value="${vehiculo.marca}" required>
+        </div>
+
+        <div>
+            <label for="modelo">Modelo:</label>
+            <input type="text" id="modelo" name="modelo" th:value="${vehiculo.modelo}" required>
+        </div>
+
+        <div>
+            <label for="capacidadMaxima">Capacidad Máxima:</label>
+            <input type="number" id="capacidadMaxima" name="capacidadMaxima" th:value="${vehiculo.capacidadMaxima}" required>
+        </div>
+
+        <div>
+            <label for="placa">Placa:</label>
+            <input type="text" id="placa" name="placa" th:value="${vehiculo.placa}" required>
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <a th:href="@{/VAdmin}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

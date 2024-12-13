@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cliente</title>
+    <link rel="stylesheet" th:href="@{/css/style_VCliente.css}">
+</head>
+<body>
+<div class="container">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <aside class="sidebar">
+        <div class="header">
+            <img src="/avatar_50x50.png" class="avatar" alt="Avatar">
+            <h2 th:text="${cliente.nombreCompleto}"></h2>
+        </div>
+        <nav>
+            <!-- Botones de menú -->
+            <button class="menu-btn" onclick="showPanel('solicitarViaje')">Solicitar Viaje</button>
+            <button class="menu-btn" onclick="showPanel('misViajes')">Mis Viajes</button>
+            <button class="menu-btn" onclick="showPanel('ActDatosPersonales')">Actualizar mis datos</button>
+        </nav>
+        <div class="logout">
+            <!-- Botón de cerrar sesión -->
+            <button class="menu-btn" onclick="showPanel('cerrarSesion')">Cerrar Sesión</button>
+        </div>
+    </aside>
+
+    <main class="content">
+
+        <!-- Panel de solicitar viaje -->
+        <div id="solicitarViaje" class="panel" th:classappend="${activePanels != null && activePanels.contains('solicitarViaje') ? 'active' : 'hidden'}">
+            <h3>Solicitar Viaje</h3>
+            <form id="formSolicitudViaje" method="POST" th:action="@{/solicitarViaje}">
+                <input type="hidden" name="clienteId" th:value="${cliente.id}" />
+
+                <label for="destino">Destino</label>
+                <input type="text" id="destino" name="destino" required="required" />
+
+                <label for="cantidadPasajeros">Cantidad de Pasajeros</label>
+                <input type="number" id="cantidadPasajeros" name="cantidadPasajeros" required="required" />
+
+                <label for="fechaSolicitud">Fecha Solicitud</label>
+                <input type="date" id="fechaSolicitud" name="fechaSolicitud"
+                       th:value="${#dates.format(today, 'yyyy-MM-dd')}"
+                       th:min="${#dates.format(today, 'yyyy-MM-dd')}" required />
+
+                <button type="submit">Solicitar Viaje</button>
+            </form>
+
+            <!-- Mensaje de éxito o error -->
+            <div th:if="${successSolicitud}" class="alert alert-success">
+                <p th:text="${successSolicitud}"></p>
+            </div>
+            <div th:if="${errorSolicitud}" class="alert alert-danger">
+                <p th:text="${errorSolicitud}" style="color: red;"></p>
+            </div>
+        </div>
+
+
+        <!-- Panel de mis viajes -->
+        <div id="misViajes" class="panel" th:classappend="${activePanels != null && activePanels.contains('misViajes') ? 'active' : 'hidden'}">
+            <h3>Mis Viajes</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>Destino</th>
+                    <th>Cantidad de Pasajeros</th>
+                    <th>Fecha de Solicitud</th>
+                    <th>Precio</th>
+                    <th>Conductor Asignado</th>
+                    <th>Estado de Viaje</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="viaje : ${viajes}">
+                    <td th:text="${viaje.destino}"></td>
+                    <td th:text="${viaje.cantidadPasajeros}"></td>
+                    <td th:text="${viaje.fechaSolicitud}"></td>
+                    <td th:text="${viaje.precio != null ? viaje.precio : 'Esperando Asignación'}"></td>
+                    <td th:text="${viaje.conductor != null ? viaje.conductor.nombreCompleto : 'Esperando Asignación'}"></td>
+                    <td th:text="${viaje.estadoViaje != null ? viaje.estadoViaje.name() : 'No asignado'}"></td>
+                    <td>
+                        <form th:action="@{/cancelarViaje}" method="POST">
+                            <input type="hidden" name="viajeId" th:value="${viaje.id}" />
+                            <button type="submit" onclick="return confirm('¿Estás seguro de cancelar tu viaje?')">Cancelar</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <!-- Mensaje de éxito o error -->
+            <div th:if="${successCancelacion}" class="alert alert-success">
+                <p th:text="${successCancelacion}"></p>
+            </div>
+            <div th:if="${errorCancelacion}" class="alert alert-danger">
+                <p th:text="${errorCancelacion}" style="color: red;"></p>
+            </div>
+        </div>
+
+        <!-- Panel del formulario para actualizar datos -->
+        <div id="ActDatosPersonales" class="panel" th:classappend="${activePanel == 'ActDatosPersonales' ? 'active' : 'hidden'}">
+            <h3>Actualizar Datos personales</h3>
+            <p>Aquí podrás ver el formulario para atualizar tus datos.</p>
+        </div>
+
+
+        <!-- Panel de cerrar sesión -->
+        <div id="cerrarSesion" class="panel hidden">
+            <h3>Cerrar Sesión</h3>
+            <p>¿Estás seguro de que deseas cerrar sesión?</p>
+            <form action="/logout" method="post">
+                <button type="submit" class="btn btn-danger">Sí, cerrar sesión</button>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script>
+  function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('active');
+  }
+
+  function showPanel(panelId) {
+    const panels = document.querySelectorAll('.panel');
+    panels.forEach(panel => {
+      if (panel.id === panelId) {
+        panel.classList.add('active');
+        panel.classList.remove('hidden');
+      } else {
+        panel.classList.remove('active');
+        panel.classList.add('hidden');
+      }
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/css/Style_AsignarForm.css}">
+    <title>Asignar Conductor</title>
+</head>
+<body>
+<h2>Asignar Conductor al Viaje</h2>
+<!-- Muestra los detalles del viaje -->
+<form th:action="@{/guardarAsignacion}" method="post">
+    <div>
+        <label>Destino:</label>
+        <span th:text="${viaje.destino}"></span>
+    </div>
+    <div>
+        <label>Cantidad de Pasajeros:</label>
+        <span th:text="${viaje.cantidadPasajeros}"></span>
+    </div>
+    <div>
+        <label>Fecha de Solicitud:</label>
+        <span th:text="${viaje.fechaSolicitud}"></span>
+    </div>
+    <div>
+        <label>Seleccionar Conductor:</label>
+        <select name="conductorId" required>
+            <option value="" disabled selected>Seleccione un conductor</option>
+            <option th:each="conductor : ${conductoresDisponibles}"
+                    th:value="${conductor.id}"
+                    th:text="${conductor.nombreCompleto}"></option>
+        </select>
+    </div>
+    <div>
+        <label>Precio:</label>
+        <input type="number" name="precio" min="1" required>
+    </div>
+    <input type="hidden" name="viajeId" th:value="${viaje.id}">
+    <button type="submit">Guardar</button>
+    <a th:href="@{/VAdmin}" class="btn btn-secondary">Cancelar</a>
+</form>
+</body>
+</html>
